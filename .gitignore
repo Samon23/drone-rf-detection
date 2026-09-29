@@ -1,0 +1,10 @@
+# Raw data is several GB, so it stays on your laptop and never goes to GitHub
+data/
+features.npz
+# C++ build outputs and test files
+cpp/*.exe
+cpp/moving_average
+cpp/*.txt
+# Python environment and cache
+.venv/
+__pycache__/
