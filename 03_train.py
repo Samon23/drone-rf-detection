@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, confusion_matrix
 from sklearn.model_selection import StratifiedGroupKFold
 from common import FIG_DIR
+from features_lib import band_centres_mhz
 
 data = np.load("features.npz")
 X, y, groups = data["X"], data["y"], data["groups"]
@@ -27,10 +28,16 @@ plt.title("Confusion matrix (all folds)")
 plt.tight_layout(); plt.savefig(FIG_DIR / "05_confusion_matrix.png", dpi=120)
 
 model = RandomForestClassifier(n_estimators=200, random_state=42).fit(X, y)
-plt.figure(figsize=(10, 3))
-plt.bar(range(X.shape[1]), model.feature_importances_)
-plt.axvline(63.5, color="red", linestyle="--")
-plt.xlabel("Feature (0-63 = lower band, 64-127 = upper band)")
-plt.ylabel("Importance"); plt.title("Which frequency bands the model relies on")
-plt.tight_layout(); plt.savefig(FIG_DIR / "06_feature_importance.png", dpi=120)
+imp = model.feature_importances_
+freqs = band_centres_mhz()
+width = freqs[1] - freqs[0]
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.2), sharey=True)
+for ax, part, name in zip(axes, (imp[:64], imp[64:]), ("Lower receiver", "Upper receiver")):
+    ax.bar(freqs, part, width=width * 0.9)
+    ax.set_title(name)
+    ax.set_xlabel("Frequency within the receiver's capture (MHz)")
+axes[0].set_ylabel("Importance")
+fig.suptitle("Which frequency bands the classifier relies on")
+fig.tight_layout(); fig.savefig(FIG_DIR / "06_feature_importance.png", dpi=120)
 print("Saved confusion matrix and feature importance figures.")

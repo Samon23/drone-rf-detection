@@ -1,17 +1,7 @@
 """Step 2: turn raw signals into a table of numbers a model can learn from."""
 import numpy as np
-from scipy import signal
-from common import CHUNK, FS, list_segments, load_signal
-
-N_BANDS = 64   # squeeze each 513-point spectrum into 64 frequency bands
-
-
-def band_features(x):
-    """Log power in N_BANDS frequency bands for one short window."""
-    f, pxx = signal.welch(x, fs=FS, nperseg=1024)
-    bands = [chunk.mean() for chunk in np.array_split(pxx, N_BANDS)]
-    return np.log10(np.array(bands) + 1e-12)
-
+from common import CHUNK, list_segments, load_signal
+from features_lib import band_features
 
 rows, labels, groups = [], [], []
 for low_file, high_file, label, seg_id in list_segments():
